@@ -1,0 +1,47 @@
+# Recommended settings for new runs and the manuscript. Identical to the package defaults;
+# listed explicitly so the run is fully documented in one file.
+
+conversion:
+  legacy_classifier: false
+  primary_series: first
+  low_b_max: 100.0
+  high_b_min: 700.0
+
+preprocess:
+  required_sequences: [T1c, T1, T2, B0, DWI, ADC]
+  save_transforms: true
+  save_qc: true
+  resampling:
+    struct_spacing: [1.0, 1.0, 5.0]
+    diff_spacing: [1.0, 1.0, 5.0]
+    antialias: true
+    preserve_extent: true
+  registration:
+    seed: 42
+    centered_init: true
+    histogram_bins: 50
+    struct_sampling: 0.15
+    diff_sampling: 0.20
+    iterations: 200
+    fail_threshold: -0.05
+    num_threads: null
+  masks:
+    closing_radius_mm: 20.0
+  intensity:
+    n4_shrink_factor: 3
+    zscore_clip_percentiles: [0.5, 99.5]
+    coverage_aware_masks: true
+    harmonize_adc_units: true
+  crop:
+    struct_xy: 320
+    diff_xy: 320
+    shared_bbox: true
+
+roi:
+  target_xy: 224
+  box_sizes_mm: {48mm: 48.0, 64mm: 64.0, 80mm: 80.0, 90mm: 90.0}
+  box_depth: 11
+  whole_depth: 3
+  valid_slice_tolerance: 0.05
+  z_window_mode: shared
+  fiducial_filenames: [msk.json, F.mrk.json]

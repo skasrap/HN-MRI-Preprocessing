@@ -1,0 +1,33 @@
+# Reproduces the pipeline used for the MD thesis (All_Preprocessing_Script_v5.py, Fids_v4.ipynb).
+# Every switch below is a post-thesis fix turned OFF. See docs/code_review.md for why each exists.
+#
+# Not exactly reproducible: the thesis registration had no sampling seed, so its transforms
+# differed slightly from run to run. A seed is set here; set it to null to restore that behaviour.
+
+conversion:
+  legacy_classifier: true          # substring "ce" contrast rule
+  primary_series: first
+
+preprocess:
+  required_sequences: [T1c, T1, T2, B0, DWI, ADC]
+  resampling:
+    struct_spacing: [1.0, 1.0, 5.0]
+    diff_spacing: [1.0, 1.0, 5.0]
+    antialias: false
+    preserve_extent: false
+  registration:
+    seed: 42
+    centered_init: false
+  intensity:
+    coverage_aware_masks: false
+    harmonize_adc_units: false
+  crop:
+    struct_xy: 320
+    diff_xy: 320
+    shared_bbox: false
+
+roi:
+  target_xy: 224
+  box_depth: 11
+  whole_depth: 3
+  z_window_mode: independent

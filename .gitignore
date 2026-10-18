@@ -1,0 +1,44 @@
+# ---- Patient data: never commit ---------------------------------------------------------
+*.dcm
+*.DCM
+*.nii
+*.nii.gz
+*.nrrd
+*.mha
+*.mhd
+*.npy
+*.npz
+*.zip
+*.tfm
+*.mrk.json
+msk.json
+data/
+outputs/
+QC/
+*_QC_*.png
+*_QC_*.jpg
+*id_map*.csv
+*key*.csv
+*manifest*.csv
+*audit*.csv
+*.xlsx
+
+# ---- Python ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# ---- Editors / OS ---------------------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

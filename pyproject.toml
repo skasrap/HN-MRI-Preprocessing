@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hn-mri-preprocessing"
+version = "0.1.0"
+description = "Leak-free DICOM-to-tensor preprocessing for multiparametric head-and-neck MRI, developed for parotid gland tumour classification."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Kasra Pirahesh" }]
+keywords = ["MRI", "head and neck", "parotid", "diffusion-weighted imaging", "ADC", "preprocessing", "deep learning", "medical imaging"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "SimpleITK>=2.3",
+    "nibabel>=5.0",
+    "pydicom>=2.4",
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+    "PyYAML>=6.0",
+    "tqdm>=4.65",
+]
+
+[project.optional-dependencies]
+excel = ["openpyxl>=3.1"]
+dev = ["pytest>=7.4", "pytest-cov>=4.1", "ruff>=0.5", "pre-commit>=3.5", "nbstripout>=0.7"]
+
+[project.scripts]
+hn-mri-prep = "hn_mri_prep.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hn_mri_prep"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "NPY", "SIM", "RUF"]
+ignore = ["E501", "RUF001", "RUF002", "RUF003"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["slow: end-to-end tests that run image registration"]
