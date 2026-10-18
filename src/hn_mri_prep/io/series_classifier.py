@@ -1,9 +1,7 @@
-"""Rule-based mapping of DICOM SeriesDescription / ImageType to sequence types.
+"""Map SeriesDescription / ImageType to a sequence type.
 
-Head-and-neck protocols are far less standardised than brain protocols: the same sequence
-is called ``t1_tse_tra_fs_ce``, ``T1W_TSE_GD``, ``Ax T1 FS +C`` ... depending on vendor and
-site. The rules below are deliberately simple and fully auditable: every decision returns
-the rule that fired, and ``hn-mri-prep classify`` writes them all to a CSV for review.
+Naming varies a lot between vendors and sites (``t1_tse_tra_fs_ce``, ``T1W_TSE_GD``,
+``Ax T1 FS +C``, ...), so the rules are simple and every result carries the rule that fired.
 """
 
 from __future__ import annotations
@@ -29,11 +27,10 @@ class Classification:
     rule: str
 
 
-# Vendor-derived maps that must never be used as model input.
+# vendor-computed maps, not used
 _SYNTHETIC = ("eadc", "edwi", "exp", "sdwi")
 _CONTRAST_SUBSTRINGS = ("gd", "gad", "post", "+c", "c+", "contrast")
-# Short markers are only trusted as whole tokens: "ce" is a substring of space, sequence,
-# reference, trace, slice ...
+# whole tokens only ("ce" is inside space, sequence, slice, ...)
 _CONTRAST_TOKENS = frozenset({"ce", "c"})
 _ADC_MARKERS = ("ddwibs", "dadc", "adc")
 _DIFFUSION_MARKERS = ("dwi", "b0", "trace", "iso", "diff")

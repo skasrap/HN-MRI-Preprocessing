@@ -1,5 +1,4 @@
-# Recommended settings for new runs and the manuscript. Identical to the package defaults;
-# listed explicitly so the run is fully documented in one file.
+# Default settings (same as the package defaults, written out in full).
 
 conversion:
   legacy_classifier: false

@@ -1,8 +1,7 @@
-"""Orientation, reference grids and anisotropy-aware resampling.
+"""Orientation, reference grids and resampling.
 
-Head-and-neck MRI is acquired as thick 2D stacks: in this cohort the median structural
-voxel is 0.37-0.46 mm in-plane x 5 mm slice, and the EPI diffusion voxel 1.0 x 1.0 x 3.85 mm.
-Every operation here therefore handles each axis separately; nothing assumes isotropy.
+Structural series here are ~0.4 x 0.4 x 5 mm and EPI ~1 x 1 x 3.85 mm, so everything is done
+per axis.
 """
 
 from __future__ import annotations

@@ -95,7 +95,7 @@ def test_shared_mode_keeps_channels_on_the_same_slices(tmp_path):
     assert np.array_equal(t1c.max(axis=(1, 2)) > 3, adc.max(axis=(1, 2)) > 1500)  # tumour on same slices
 
     indep = extract_subject(d, tmp_path / "indep", _cfg("independent"))
-    assert indep["box_window_struct"] == (5, 16) and indep["box_window_diff"] == (3, 14)  # thesis: 2-slice offset
+    assert indep["box_window_struct"] == (5, 16) and indep["box_window_diff"] == (3, 14)
     t1c = np.load(tmp_path / "indep" / "64mm" / "S1_T1c.npy")
     adc = np.load(tmp_path / "indep" / "64mm" / "S1_ADC.npy")
     assert not np.array_equal(t1c.max(axis=(1, 2)) > 3, adc.max(axis=(1, 2)) > 1500)

@@ -1,10 +1,4 @@
-"""Bias-field correction and intensity normalisation.
-
-All operations are *per image* (statistics come from the image itself), so none of them can
-leak information between training and evaluation subjects. The only cross-subject intensity
-statistic in the project is the ADC scaling, which is fitted inside each CV fold
-(:mod:`hn_mri_prep.normalization.adc`).
-"""
+"""Bias-field correction and intensity normalisation (all per image)."""
 
 from __future__ import annotations
 

@@ -1,10 +1,7 @@
-"""Typed configuration for every pipeline stage.
+"""Pipeline configuration.
 
-Every numeric choice that used to be hard-coded in the thesis scripts lives here, so a
-run is fully described by one YAML file (which is also copied into each output folder).
-
-Defaults correspond to ``configs/recommended.yaml``. ``configs/thesis_v5.yaml`` switches
-off the post-thesis fixes so the original pipeline can be reproduced.
+All parameters live here and are loaded from YAML (see ``configs/``). Defaults match
+``configs/recommended.yaml``; ``configs/thesis_v5.yaml`` reproduces the thesis runs.
 """
 
 from __future__ import annotations
@@ -23,12 +20,9 @@ import yaml
 class ConversionConfig:
     """Stage 2: DICOM series -> canonical NIfTI files per subject."""
 
-    # Use whole-token matching for contrast markers ("ce", "c"). The thesis version used
-    # substring matching, which labels e.g. "t1_space" or "t1_reference" as contrast-enhanced.
+    # substring matching for "ce" (thesis); also matches "space", "reference", ...
     legacy_classifier: bool = False
-    # When several axial series map to the same sequence type, which one becomes the
-    # primary file (``T1c.nii.gz``); the others are kept as ``T1c_run-2.nii.gz`` etc.
-    # Ordered by DICOM SeriesNumber, which makes the choice deterministic.
+    # which candidate (by SeriesNumber) becomes T1c.nii.gz etc.; the rest are *_run-N
     primary_series: Literal["first", "last"] = "first"
     skip_description_tokens: tuple[str, ...] = ("dyn",)
     low_b_max: float = 100.0
@@ -39,29 +33,26 @@ class ConversionConfig:
 class ResamplingConfig:
     struct_spacing: tuple[float, float, float] = (1.0, 1.0, 5.0)
     diff_spacing: tuple[float, float, float] = (1.0, 1.0, 5.0)
-    # Gaussian pre-filter before down-sampling (e.g. 0.37 mm T2 -> 1 mm) to avoid aliasing.
+    # Gaussian pre-filter on down-sampled axes
     antialias: bool = True
-    # Keep the physical field of view of the anchor when the spacing changes (shifts the
-    # first voxel centre by half the spacing difference). Sub-voxel effect.
+    # keep the anchor's physical extent when the spacing changes (sub-voxel shift)
     preserve_extent: bool = True
 
 
 @dataclass(frozen=True)
 class RegistrationConfig:
-    # Seed for Mattes-MI random sampling. ``None`` reproduces the thesis behaviour, which
-    # is NOT deterministic (results differ between runs).
+    # MI sampling seed; None = unseeded (thesis), not reproducible
     seed: int | None = 42
-    # Initialise rigid transforms at the geometric centre of the fixed image. Without it the
-    # rotation centre is the scanner origin, which couples rotation and translation.
+    # rotate about the image centre instead of the scanner origin
     centered_init: bool = True
     histogram_bins: int = 50
     struct_sampling: float = 0.15
     diff_sampling: float = 0.20
     learning_rate: float = 0.1
     iterations: int = 200
-    # Final negative-MI must be below this value, otherwise the subject is rejected.
+    # reject the subject if the final metric is above this
     fail_threshold: float = -0.05
-    # ``None`` uses all cores. Set to 1 for strict bit-for-bit reproducibility across machines.
+    # None = all cores; 1 gives bit-identical results
     num_threads: int | None = None
 
 
@@ -77,11 +68,9 @@ class MaskConfig:
 class IntensityConfig:
     n4_shrink_factor: int = 3
     zscore_clip_percentiles: tuple[float, float] = (0.5, 99.5)
-    # Restrict each moving image's mask to the voxels it actually covers after registration.
-    # Without it, slices outside a shorter T1/T2 stack enter the z-score statistics as zeros.
+    # exclude voxels outside a moving image's FOV from its N4/z-score mask
     coverage_aware_masks: bool = True
-    # Convert ADC to 1e-6 mm^2/s regardless of vendor export scale (a fixed physical rule,
-    # not a data-derived statistic, so it is leakage-free).
+    # rescale ADC to 1e-6 mm^2/s whatever the vendor export unit
     harmonize_adc_units: bool = True
 
 
@@ -89,8 +78,7 @@ class IntensityConfig:
 class CropConfig:
     struct_xy: int = 320
     diff_xy: int = 320
-    # Crop structural and diffusion volumes with the same bounding box so all channels stay
-    # voxel-aligned. The thesis used separate boxes (aligned only in physical space).
+    # one bounding box for all channels (thesis: separate structural/diffusion boxes)
     shared_bbox: bool = True
 
 
@@ -118,9 +106,8 @@ class ROIConfig:
     whole_depth: int = 3
     pad_value: float = 0.0
     valid_slice_tolerance: float = 0.05
-    # "shared": structural and diffusion windows cover the same slices (required for
-    # channel-wise fusion). "independent": thesis behaviour; the diffusion window may be
-    # shifted to avoid incomplete EPI slices while the structural one is not.
+    # "shared": same slices for all sequences. "independent" (thesis): only the diffusion
+    # window is shifted away from incomplete EPI slices.
     z_window_mode: Literal["shared", "independent"] = "shared"
     fiducial_filenames: tuple[str, ...] = ("msk.json", "F.mrk.json")
     sequences: tuple[str, ...] = ("T1", "T2", "T1c", "B0", "DWI", "ADC", "StructMask", "DiffMask")

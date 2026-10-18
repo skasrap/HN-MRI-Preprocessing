@@ -1,24 +1,13 @@
-"""Leakage-safe ADC scaling for cross-validation.
+"""ADC scaling fitted per cross-validation fold.
 
-ADC is the one channel kept in physical units after preprocessing, because its absolute
-value carries diagnostic information (e.g. pleomorphic adenoma vs Warthin tumour). Mapping
-it to [0, 1] needs a range, and a range estimated from the whole cohort would let
-validation/test subjects influence the training inputs. The scaler is therefore fitted on
-the training subjects of each fold only and applied unchanged to that fold's held-out subjects.
+The scaler is fitted on the training subjects of a fold and applied unchanged to the held-out
+subjects; it raises ``DataLeakageError`` if used on a subject it was fitted on.
 
-Methods:
-
-* ``"minmax"``: training-fold minimum and maximum (the thesis approach). Simple, but the
-  maximum of millions of voxels is set by a single extreme voxel (CSF, cyst, artefact), so
-  the scale can change noticeably between folds.
-* ``"percentile"``: training-fold percentiles of the pooled tissue voxels (default
-  0.5 / 99.5). Same leakage guarantees, much less sensitive to outliers.
-* ``"fixed"``: a physiological range fixed before seeing the data (e.g. 0-3000 x 1e-6 mm^2/s).
-  Nothing is estimated, so there is nothing to leak. A good sensitivity analysis.
+Methods: ``"minmax"`` (as in the thesis), ``"percentile"`` (pooled tissue voxels, default
+0.5/99.5; less affected by single extreme voxels), ``"fixed"`` (a range set in advance).
 
 Example::
 
-    folds = [(train_ids, val_ids) for train_ids, val_ids in my_splitter]
     scalers = fit_fold_scalers(adc_by_subject, folds, method="percentile")
     x_val = scalers[k].transform(adc_by_subject[sid], subject_id=sid)
 """
