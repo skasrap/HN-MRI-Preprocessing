@@ -1,21 +1,12 @@
-"""Stage 4: fiducial-centred, fixed-size tensors for the classifier.
+"""Fiducial-centred patches for the classifier.
 
-For every subject and every sequence this writes
+Per subject and sequence:
 
-* ``<box>/<subject>_<seq>.npy``: a ``box_depth`` x 224 x 224 patch of a fixed physical
-  size (48 / 64 / 80 / 90 mm) centred on the tumour fiducial;
-* ``Whole_3Slice/<subject>_<seq>.npy``: ``whole_depth`` full slices, padded to square.
+* ``<box>/<subject>_<seq>.npy``: ``box_depth`` x 224 x 224 patch of 48/64/80/90 mm around
+  the tumour fiducial;
+* ``Whole_3Slice/<subject>_<seq>.npy``: ``whole_depth`` full slices padded to square.
 
-Arrays are float32 in radiological orientation (row 0 = anterior, column 0 = patient right).
-
-Changes relative to ``Fids_v4.ipynb``:
-
-* the slice window always has exactly ``box_depth`` slices (before, a short EPI stack gave
-  fewer slices, so tensor shapes differed between subjects);
-* ``z_window_mode="shared"`` uses the same slices for structural and diffusion channels;
-  before, only the diffusion window was shifted to avoid incomplete EPI slices, so channel
-  k of T1c and channel k of ADC could be different anatomical levels;
-* a manifest records, per subject, whether the tumour centre lies inside the window.
+float32, ``[slice, row, col]``, radiological orientation (row 0 anterior, column 0 patient right).
 """
 
 from __future__ import annotations

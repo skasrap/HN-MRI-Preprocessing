@@ -1,17 +1,13 @@
-"""Stage 3: register, resample, bias-correct, normalise and crop one subject.
+"""Per-subject preprocessing: register, resample, bias-correct, normalise, crop.
 
-Flow (unchanged from the thesis ``All_Preprocessing_Script_v5.py``):
-
-1. Reorient all six series to RAS.
-2. Rigid T2 -> T1c and T1 -> T1c; affine B0 -> T2 (EPI distortions are partly absorbed
-   by the affine). DWI and ADC reuse the B0 transform (same acquisition), composed with
-   T2 -> T1c, so every image is interpolated exactly once.
-3. Resample onto a T1c-anchored 1 x 1 x 5 mm grid.
-4. Masks: Li threshold on T1c (structural), Otsu on log-B0 intersected with the
-   structural mask (diffusion).
-5. N4 bias correction on T1c/T1/T2; per-image z-score (T1c, T1, T2, B0, DWI); ADC kept in
-   physical units (only masked), so it can be scaled inside each CV fold later.
-6. Crop to the tissue bounding box and pad / centre-crop to 320 x 320 in-plane.
+1. Reorient to RAS.
+2. T1, T2 -> T1c rigid; B0 -> T2 affine. DWI/ADC use the B0 transform composed with
+   T2 -> T1c, so each image is interpolated once.
+3. Resample to a 1 x 1 x 5 mm grid anchored on T1c.
+4. Tissue masks: Li threshold on T1c, Otsu on log B0 (intersected with the T1c mask).
+5. N4 on structural images; z-score T1c/T1/T2/B0/DWI per image. ADC stays in physical
+   units and is scaled per CV fold at training time.
+6. Crop to the tissue bounding box, pad/crop to 320 x 320 in-plane.
 """
 
 from __future__ import annotations
@@ -70,7 +66,7 @@ def preprocess_subject(subject_dir: Path, out_root: Path, cfg: PreprocessConfig,
         if not record[f"{seq}_on_B0_grid"]:
             log.warning("%s: %s is not on the B0 voxel grid; is it from the same acquisition?", subject, seq)
 
-    # --- 2. Registration -----------------------------------------------------------------
+    # registration
     rc = cfg.registration
     t2_reg = register(img["T1c"], img["T2"], "rigid", rc, "T2->T1c")
     t1_reg = register(img["T1c"], img["T1"], "rigid", rc, "T1->T1c") if img["T1"] is not None else None
@@ -86,7 +82,7 @@ def preprocess_subject(subject_dir: Path, out_root: Path, cfg: PreprocessConfig,
         "metric_B0_T2": round(b0_reg.metric, 4),
     })
 
-    # --- 3. Resampling ---------------------------------------------------------------------
+    # resampling
     rs = cfg.resampling
     struct_grid = geometry.make_reference_grid(img["T1c"], rs.struct_spacing, rs.preserve_extent)
     diff_grid = geometry.make_reference_grid(img["T1c"], rs.diff_spacing, rs.preserve_extent)
@@ -96,7 +92,7 @@ def preprocess_subject(subject_dir: Path, out_root: Path, cfg: PreprocessConfig,
         for s in SEQUENCES if img[s] is not None
     }
 
-    # --- 4. Masks --------------------------------------------------------------------------
+    # masks
     mc = cfg.masks
     struct_mask = masks.structural_mask(res["T1c"], mc.closing_radius_mm, mc.struct_smoothing_sigma)
     struct_on_diff = geometry.resample(struct_mask, diff_grid, None, sitk.sitkNearestNeighbor)
@@ -114,7 +110,7 @@ def preprocess_subject(subject_dir: Path, out_root: Path, cfg: PreprocessConfig,
             norm_mask[s] = norm_mask["B0"]
         diff_mask = norm_mask["B0"]
 
-    # --- 5. Intensity ----------------------------------------------------------------------
+    # intensity
     ic = cfg.intensity
     out: dict[str, sitk.Image] = {}
     for s in STRUCTURAL:
@@ -128,7 +124,7 @@ def preprocess_subject(subject_dir: Path, out_root: Path, cfg: PreprocessConfig,
         adc, record["adc_source_unit"] = intensity.harmonize_adc_units(adc, norm_mask["ADC"])
     out["ADC"] = intensity.apply_mask(adc, norm_mask["ADC"])
 
-    # --- 6. Cropping -----------------------------------------------------------------------
+    # cropping
     cc = cfg.crop
     s_bbox = cropping.tissue_bbox(struct_mask)
     if s_bbox is None:
@@ -149,7 +145,7 @@ def preprocess_subject(subject_dir: Path, out_root: Path, cfg: PreprocessConfig,
     final["StructMask"] = cropping.crop_to_bbox_xy(struct_mask, s_bbox, cc.struct_xy)
     final["DiffMask"] = cropping.crop_to_bbox_xy(diff_mask, d_bbox, cc.diff_xy)
 
-    # --- Outputs ---------------------------------------------------------------------------
+    # outputs
     subj_out = out_root / subject
     subj_out.mkdir(parents=True, exist_ok=True)
     for name, im in final.items():

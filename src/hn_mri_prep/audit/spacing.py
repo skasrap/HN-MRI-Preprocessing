@@ -1,8 +1,4 @@
-"""Voxel-spacing audit of a converted dataset (manuscript Table: acquisition parameters).
-
-It is descriptive only. The target grid (1 x 1 x 5 mm) is fixed in the configuration and is
-not derived from these statistics, so the audit can include every subject without leakage.
-"""
+"""Voxel-spacing statistics of a converted dataset (descriptive only)."""
 
 from __future__ import annotations
 

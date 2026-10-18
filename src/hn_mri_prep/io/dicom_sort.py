@@ -1,15 +1,8 @@
-"""Stage 1: unpack exported ZIP archives into ``<subject>/<series>/`` DICOM folders.
+"""Unpack exported ZIP archives into ``<subject>/<series>/`` DICOM folders.
 
-Changes relative to the thesis notebook (``Unzip.ipynb``):
-
-* every header is read once (was three times per file);
-* files are written as ``<SOPInstanceUID>.dcm`` so files with identical names in different
-  sub-folders of an archive can no longer overwrite each other;
-* a repeated PatientID is reported as a *possible duplicate patient*. Two archives of the
-  same patient become two subject folders, and if both reach the model they must be kept
-  in the same cross-validation fold;
-* optional pseudonymisation: subject folders are named ``<prefix>0001`` ... and the
-  PatientID mapping is written to a file you keep outside the repository.
+Files are renamed to ``<SOPInstanceUID>.dcm``. A PatientID seen in more than one archive is
+flagged in the manifest, since both subjects have to stay in the same CV fold. Subjects can
+optionally be pseudonymised (``<prefix>0001``, ...), with the key written to a separate file.
 """
 
 from __future__ import annotations

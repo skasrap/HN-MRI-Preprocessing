@@ -1,8 +1,6 @@
-"""Intra-subject registration: T1/T2 -> T1c (rigid) and B0 -> T2 (affine).
+"""Intra-subject registration (Mattes MI, multi-resolution gradient descent).
 
-Mattes mutual information with random sampling. A fixed seed is passed to the sampler:
-without it, two runs on the same data give different transforms (verified: ~0.2 mm
-translation differences), so preprocessing outputs cannot be reproduced.
+The random metric sampler gets a fixed seed; unseeded runs give slightly different transforms.
 """
 
 from __future__ import annotations

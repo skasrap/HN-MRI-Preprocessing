@@ -32,7 +32,7 @@ def test_common_descriptions(desc, expected):
 def test_ce_substring_bug_is_fixed(desc):
     """'ce' inside space/reference/sequence/slice must not mean contrast-enhanced."""
     assert classify_series(desc).series_type is T.T1
-    assert classify_series(desc, legacy=True).series_type is T.T1C  # documented thesis behaviour
+    assert classify_series(desc, legacy=True).series_type is T.T1C
 
 
 def test_adc_from_image_type():

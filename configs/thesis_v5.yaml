@@ -1,11 +1,9 @@
-# Reproduces the pipeline used for the MD thesis (All_Preprocessing_Script_v5.py, Fids_v4.ipynb).
-# Every switch below is a post-thesis fix turned OFF. See docs/code_review.md for why each exists.
-#
-# Not exactly reproducible: the thesis registration had no sampling seed, so its transforms
-# differed slightly from run to run. A seed is set here; set it to null to restore that behaviour.
+# Settings used for the thesis (All_Preprocessing_Script_v5.py, Fids_v4.ipynb).
+# Everything listed in docs/changes.md is switched off here. The thesis registration was
+# unseeded; a seed is set below (null = unseeded, as in the thesis).
 
 conversion:
-  legacy_classifier: true          # substring "ce" contrast rule
+  legacy_classifier: true
   primary_series: first
 
 preprocess:

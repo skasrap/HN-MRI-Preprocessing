@@ -1,8 +1,7 @@
-"""Foreground (head-and-neck tissue) masks for structural and EPI images.
+"""Head-and-neck tissue masks for structural and EPI images.
 
-The morphological closing radius is given in millimetres and converted per axis, with a
-single-voxel radius through-plane: a 20 mm in-plane radius on a 5 mm slice axis would
-otherwise merge slices 20 mm apart (4 slices) into the mask.
+The closing radius is in mm in-plane and one voxel through-plane, otherwise a 20 mm kernel
+would join slices 4 apart on a 5 mm grid.
 """
 
 from __future__ import annotations

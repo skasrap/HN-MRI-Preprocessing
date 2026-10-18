@@ -1,18 +1,9 @@
-"""Stage 2: convert sorted DICOM series to one canonical NIfTI set per subject.
+"""Convert sorted DICOM series to one NIfTI set per subject.
 
-Output per subject: ``T1.nii.gz, T1c.nii.gz, T2.nii.gz, B0.nii.gz, DWI.nii.gz, ADC.nii.gz``
-(+ ``*_run-N`` for extra candidates) and ``conversion_manifest.csv`` listing every series
-seen, the rule that classified it and where it went.
-
-Changes relative to the thesis notebook:
-
-* when several series qualify for the same slot, the primary file is chosen by DICOM
-  SeriesNumber (deterministic). Before, it was whichever ``glob`` returned first;
-* B0 and DWI are taken from the same acquisition, and the primary ADC is preferably the
-  one that shares the B0 voxel grid (i.e. was derived from that acquisition);
-* re-running is idempotent: the temporary and output folders of a subject are rebuilt
-  instead of accumulating ``_run-2`` duplicates;
-* contrast detection uses whole tokens (see :mod:`series_classifier`).
+Writes ``T1, T1c, T2, B0, DWI, ADC`` (``.nii.gz``), extra candidates as ``*_run-N``, and a
+``conversion_manifest.csv`` with every series and how it was classified. If several series
+qualify for one slot, the lowest SeriesNumber wins; B0/DWI come from the same acquisition and
+the ADC on the B0 grid is preferred.
 """
 
 from __future__ import annotations
