@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "HN-MRI-Preprocessing: preprocessing for multiparametric head-and-neck MRI"
+authors:
+  - family-names: Pirahesh
+    given-names: Kasra
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/skasrap/HN-MRI-Preprocessing"
+keywords: [MRI, parotid gland, head and neck, diffusion-weighted imaging, deep learning]
